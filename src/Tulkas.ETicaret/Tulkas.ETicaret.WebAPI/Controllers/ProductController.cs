@@ -6,6 +6,7 @@ using Tulkas.ETicaret.Core.DbModels;
 using Tulkas.ETicaret.Core.Interfaces;
 using Tulkas.ETicaret.Core.Specifications;
 using Tulkas.ETicaret.WebAPI.Dtos;
+using Tulkas.ETicaret.WebAPI.Helpers;
 
 namespace Tulkas.ETicaret.WebAPI.Controllers
 {
@@ -26,11 +27,15 @@ namespace Tulkas.ETicaret.WebAPI.Controllers
 
 
         [HttpGet("GetAllProducts")]
-        public async Task<ActionResult<IReadOnlyList<Product>>> GetAllProducts()
+        public async Task<ActionResult<Pagination<ProductDto>>> GetAllProducts([FromQuery] ProductSpecParams productSpecParams)
         {
-            var spec = new ProductWithTypeAndBrandSpecification();
-            var data = await _productRepository.ListAsync(spec);
-            return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(data));
+            var spec = new ProductWithTypeAndBrandSpecification(productSpecParams);
+            var countSpec = new ProductWithFiltersForCountSpecification(productSpecParams);
+            var totalItems = await _productRepository.CountAsync(spec);
+            var products = await _productRepository.ListAsync(spec);
+            var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products);
+
+            return Ok(new Pagination<ProductDto>(productSpecParams.PageIndex, productSpecParams.PageSize, totalItems, data));
         }
 
         [HttpGet("GetProductById")]
