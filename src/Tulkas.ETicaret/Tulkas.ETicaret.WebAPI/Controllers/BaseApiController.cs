@@ -4,11 +4,7 @@ namespace Tulkas.ETicaret.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class BaseApiController : ControllerBase
     {
-        public ProductsController()
-        {
-            
-        }
     }
 }
